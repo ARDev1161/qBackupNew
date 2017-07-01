@@ -33,6 +33,7 @@ signals:
 
 private slots:
     void finishedUpload();
+    void finishedBackup();
 
     void on_buttonBox_accepted();
 
@@ -44,11 +45,14 @@ private:
     void uploadOnYD(QString fileName);
     void loadSettings();
 
+
+
     bool _enabledAutoBackup;
     bool _enableUpload;
     bool _poweroff;
     QTime _backupTime;
     QSettings qSett;
+    QString _fileName;
     QString _name;
     QString _dir;
     QString _backupDir;

@@ -6,6 +6,7 @@
 #include <QCheckBox>
 #include <ydapi.h>
 #include <QProcess>
+#include <QThread>
 
 #ifdef Q_OS_WIN32
 #include "quazip/JlCompress.h"
@@ -15,6 +16,7 @@
 #include "quazip5/JlCompress.h"
 #endif
 
+#include "backuper.h"
 #include "backuptask.h"
 #include "ui_backuptask.h"
 
@@ -62,29 +64,43 @@ void backupTask::runBackup()
     emit trayMessageSignal(true, tr("Starting backup: ") + _name);
     bool succes = false;
 
-    QString fileName = this->_backupDir + QDir::separator() +
-            this->_name + QDate::currentDate().toString("dd.MM.yyyy");
+    _fileName = this->_backupDir + QDir::separator() +
+            this->_name + "_" + QDate::currentDate().toString("dd.MM.yyyy");
 
-    QString tempFileName = fileName + ".zip";
+    QString tempFileName = _fileName + ".zip";
 
     if(QFile(tempFileName).exists()){
         bool exist = true;
         for(int i=0; exist != false; i++){
-            QString buffFileName = fileName+QString("(%1)").arg(i);
+            QString buffFileName = _fileName+QString("(%1)").arg(i);
             if(!QFile(buffFileName+".zip").exists()){
                 exist = false;
-                fileName = buffFileName+".zip";
+                _fileName = buffFileName+".zip";
             }
         }
     } else {
-        fileName += ".zip";
+        _fileName += ".zip";
     }
 
-    succes = JlCompress::compressDir(fileName, this->_dir, true, QDir::AllDirs);
+    QThread *thread = new QThread();
+    Backuper *threadBackuper = new Backuper(_fileName, this->_dir);
+    threadBackuper->moveToThread(thread);
 
-    if(succes == true){
-        succes = QFile(fileName).exists();
-    }
+    connect(thread, SIGNAL(started()), threadBackuper, SLOT(runBackup()));
+    connect(threadBackuper, SIGNAL(backupFinished()), thread, SLOT(quit()));
+    connect(threadBackuper, SIGNAL(backupFinished()), this, SLOT(finishedBackup())); //after runBackup
+    connect(threadBackuper, SIGNAL(backupFinished()), threadBackuper, SLOT(deleteLater()));
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+
+    thread->start();
+}
+    //////////////////////////////////////////////////////
+
+void backupTask::finishedBackup()
+{
+    //succes = JlCompress::compressDir(_fileName, this->_dir, true, QDir::AllDirs);
+
+    bool succes = QFile(_fileName).exists();
 
     if(succes)
         emit trayMessageSignal(succes, tr("Backuping succes: ") + _name);
@@ -93,7 +109,7 @@ void backupTask::runBackup()
 
     if(succes && _enableUpload){
         emit trayMessageSignal(true, tr("Starting upload: ") + _name);
-        uploadOnYD(fileName);
+        uploadOnYD(_fileName);
     } else if(_poweroff){
 #ifdef Q_OS_WIN32
         QProcess::startDetached("shutdown -s -f -t 00");

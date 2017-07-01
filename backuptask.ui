@@ -17,61 +17,20 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
        <string>Tab 1</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="2" column="2">
-        <widget class="QLineEdit" name="backupDirLineEdit"/>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>Time</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="2">
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>Backup directory</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="4">
-        <widget class="QPushButton" name="backupDirButton">
-         <property name="text">
-          <string>Open...</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Enabled</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="4">
-        <widget class="QPushButton" name="dirButton">
-         <property name="text">
-          <string>Open...</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QLineEdit" name="dirLineEdit"/>
-       </item>
-       <item row="4" column="2">
+       <item row="5" column="0">
         <widget class="QCheckBox" name="enableTaskCB">
          <property name="enabled">
           <bool>true</bool>
          </property>
          <property name="text">
-          <string/>
+          <string>Enabled</string>
          </property>
         </widget>
        </item>
@@ -82,6 +41,23 @@
          </property>
         </widget>
        </item>
+       <item row="0" column="2">
+        <widget class="QLineEdit" name="dirLineEdit"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Time</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="4">
+        <widget class="QPushButton" name="backupDirButton">
+         <property name="text">
+          <string>Open...</string>
+         </property>
+        </widget>
+       </item>
        <item row="3" column="2">
         <widget class="QTimeEdit" name="taskTimeEdit">
          <property name="enabled">
@@ -89,7 +65,24 @@
          </property>
         </widget>
        </item>
-       <item row="6" column="1">
+       <item row="0" column="4">
+        <widget class="QPushButton" name="dirButton">
+         <property name="text">
+          <string>Open...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="2">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Backup directory</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QLineEdit" name="backupDirLineEdit"/>
+       </item>
+       <item row="7" column="1">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -102,17 +95,10 @@
          </property>
         </spacer>
        </item>
-       <item row="5" column="0">
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>Shutting down</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="2">
+       <item row="6" column="0">
         <widget class="QCheckBox" name="poweroffCheckBox">
          <property name="text">
-          <string/>
+          <string>Shutting down</string>
          </property>
         </widget>
        </item>
@@ -124,10 +110,8 @@
       <zorder>dirLineEdit</zorder>
       <zorder>taskTimeEdit</zorder>
       <zorder>label_3</zorder>
-      <zorder>label_4</zorder>
-      <zorder>enableTaskCB</zorder>
       <zorder>backupDirLineEdit</zorder>
-      <zorder>label_5</zorder>
+      <zorder>enableTaskCB</zorder>
       <zorder>poweroffCheckBox</zorder>
      </widget>
      <widget class="QWidget" name="YDTab">
@@ -136,16 +120,9 @@
       </attribute>
       <layout class="QFormLayout" name="formLayout">
        <item row="0" column="0">
-        <widget class="QLabel" name="label_6">
-         <property name="text">
-          <string>Upload on YD</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
         <widget class="QCheckBox" name="YDUpladCB">
          <property name="text">
-          <string/>
+          <string>Upload on YandexDisk</string>
          </property>
         </widget>
        </item>
