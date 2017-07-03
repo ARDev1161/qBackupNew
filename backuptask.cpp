@@ -62,7 +62,6 @@ backupTask::~backupTask()
 void backupTask::runBackup()
 {
     emit trayMessageSignal(true, tr("Starting backup: ") + _name);
-    bool succes = false;
 
     _fileName = this->_backupDir + QDir::separator() +
             this->_name + "_" + QDate::currentDate().toString("dd.MM.yyyy");
@@ -109,7 +108,7 @@ void backupTask::finishedBackup()
 
     if(succes && _enableUpload){
         emit trayMessageSignal(true, tr("Starting upload: ") + _name);
-        uploadOnYD(_fileName);
+        uploadOnYD();
     } else if(_poweroff){
 #ifdef Q_OS_WIN32
         QProcess::startDetached("shutdown -s -f -t 00");
@@ -176,17 +175,27 @@ bool backupTask::enabledAutoBackup() const
     return _enabledAutoBackup;
 }
 
-void backupTask::uploadOnYD(QString fileName)
+void backupTask::uploadOnYD()
 {
     ydapi = new YDAPI();
     ydapi->setToken(qSett.value("token").toString());
 
+    connect(ydapi, SIGNAL(finished()), this, SLOT(finishedCreateFolder()));
+    ydapi->createFolder(this->_name);
+
+}
+
+void backupTask::finishedCreateFolder()
+{
+    disconnect(ydapi, SIGNAL(finished()), this, SLOT(finishedCreateFolder()));
+    ydapi->upload(_fileName);
     connect(ydapi, SIGNAL(finished()), this, SLOT(finishedUpload()));
-    ydapi->upload(fileName);
 }
 
 void backupTask::finishedUpload()
 {
+    disconnect(ydapi, SIGNAL(finished()), this, SLOT(finishedUpload()));
+    ydapi->deleteLater();
     emit trayMessageSignal(true, tr("Uploading complete: ") + _name);
     if(_poweroff){
 #ifdef Q_OS_WIN32

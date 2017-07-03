@@ -34,6 +34,7 @@ signals:
 private slots:
     void finishedUpload();
     void finishedBackup();
+    void finishedCreateFolder();
 
     void on_buttonBox_accepted();
 
@@ -42,7 +43,7 @@ private slots:
     void on_backupDirButton_clicked();
 
 private:
-    void uploadOnYD(QString fileName);
+    void uploadOnYD();
     void loadSettings();
 
 
