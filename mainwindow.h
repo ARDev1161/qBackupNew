@@ -7,8 +7,10 @@
 #include <QTreeWidgetItem>
 #include <QSystemTrayIcon>
 
-#include "backuptask.h"
+//#include "backuptaskdialog.h"
+#include "taskdialog.h"
 #include "settings.h"
+#include "taskqueue.h"
 
 #define ORGANIZATION_NAME "romanzm"
 #define ORGANIZATION_DOMAIN "none"
@@ -41,6 +43,8 @@ private slots:
 
     void trayMessageSlot(bool ok, QString messageText);
 
+    void powerOff();
+
     //--------------------------------------
     void on_actionAdd_task_triggered();
 
@@ -52,17 +56,22 @@ private slots:
 
     void on_actionSettings_triggered();
 
+    void on_actionShow_queue_triggered();
+
 private:
-    settings MWSettings;
-    QTimer *backupTimer;
-    QSettings qSett;
-    QVector<backupTask*> tasks;
     Ui::MainWindow *ui;
+    QSettings qSett;
+    QTimer *backupTimer;
+
     QSystemTrayIcon *systemTray;
     QMenu *trayMenu;
+
+    settings MWSettings;        //main settings window
+    taskQueue *backupQueue = new taskQueue();
+
+    QVector<backupTask*> tasks;
     QAction *toggleVisibleAction;
     QAction *togleVisibleAction;
-    //QTimer *timer;
 };
 
 #endif // MAINWINDOW_H

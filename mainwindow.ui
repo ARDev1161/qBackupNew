@@ -78,6 +78,8 @@
    <addaction name="separator"/>
    <addaction name="actionRun_Backup"/>
    <addaction name="separator"/>
+   <addaction name="actionShow_queue"/>
+   <addaction name="separator"/>
    <addaction name="actionSettings"/>
   </widget>
   <action name="actionAdd_task">
@@ -103,6 +105,11 @@
   <action name="actionSettings">
    <property name="text">
     <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionShow_queue">
+   <property name="text">
+    <string>Show  queue</string>
    </property>
   </action>
  </widget>

@@ -26,17 +26,24 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += main.cpp\
         mainwindow.cpp \
     settings.cpp \
+    backuper.cpp \
     backuptask.cpp \
-    backuper.cpp
+    taskdialog.cpp \
+    taskqueue.cpp \
+    taskuploader.cpp
 
 HEADERS  += mainwindow.h \
     settings.h \
+    backuper.h \
     backuptask.h \
-    backuper.h
+    taskdialog.h \
+    taskqueue.h \
+    taskuploader.h
 
 FORMS    += mainwindow.ui \
     settings.ui \
-    backuptask.ui
+    taskdialog.ui \
+    taskqueue.ui
 
 win32 {
     INCLUDEPATH += D:/Qt/quazip/include

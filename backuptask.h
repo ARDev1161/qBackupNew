@@ -1,64 +1,53 @@
 #ifndef BACKUPTASK_H
 #define BACKUPTASK_H
 
-#include <QDialog>
-#include <QSettings>
+#include <QObject>
 #include <QTime>
-#include <ydapi.h>
+#include <QSettings>
 
-namespace Ui {
-class backupTask;
-}
 
-class backupTask : public QDialog
+class backupTask : public QObject
 {
     Q_OBJECT
-
 public:
-    explicit backupTask(QWidget *parent = 0);
-    backupTask(QString taskName);
-    ~backupTask();
+    explicit backupTask(QObject *parent = nullptr);
+    backupTask(QString name);
 
-    void runBackup();
+    QString getName() const;
 
-    QString name();
-    QString dir();
-    QString backupDir();
-    QTime backupTime();
+    QString getInputFolder() const;
+    void setInputFolder(const QString &value);
 
-    bool enabledAutoBackup() const;
+    QString getOutputFolder() const;
+    void setOutputFolder(const QString &value);
+
+    QTime getAutoBackupTime() const;
+    void setAutoBackupTime(const QTime &value);
+
+    bool getAutoBackup() const;
+    void setAutoBackup(bool value);
+
+    bool getUpload() const;
+    void setUpload(bool value);
 
 signals:
-    void trayMessageSignal(bool ok, QString messageText);
 
-private slots:
-    void finishedUpload();
-    void finishedBackup();
-    void finishedCreateFolder();
-
-    void on_buttonBox_accepted();
-
-    void on_dirButton_clicked();
-
-    void on_backupDirButton_clicked();
+public slots:
 
 private:
-    void uploadOnYD();
+    QString name;
+    QString inputFolder;
+    QString outputFolder;
+
+    QTime autoBackupTime;
+
+    bool autoBackup;
+    bool upload;
+
+    QSettings qSett;
+
     void loadSettings();
 
-
-
-    bool _enabledAutoBackup;
-    bool _enableUpload;
-    bool _poweroff;
-    QTime _backupTime;
-    QSettings qSett;
-    QString _fileName;
-    QString _name;
-    QString _dir;
-    QString _backupDir;
-    YDAPI *ydapi;
-    Ui::backupTask *ui;
 };
 
 #endif // BACKUPTASK_H

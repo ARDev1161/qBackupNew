@@ -7,10 +7,12 @@
 #include <QApplication>
 #include <QDir>
 #include <QTimer>
+#include <QProcess>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "backuptask.h"
+#include "taskdialog.h"
 #include "settings.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -19,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(ui->treeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
-            this, SLOT(showTaskSettings(QTreeWidgetItem*)));
+            this, SLOT(showTaskSettings(QTreeWidgetItem*)));            //open task settings window
     loadTasks();
 
     //----------------------Tray menu
@@ -42,6 +44,10 @@ MainWindow::MainWindow(QWidget *parent) :
     backupTimer = new QTimer(this);
     backupTimer->start(50000);
     connect(backupTimer, SIGNAL(timeout()), this, SLOT(startBackup()));
+
+
+    //------------
+    connect(backupQueue, SIGNAL(backupFinished()), this, SLOT(powerOff()));
 }
 
 void MainWindow::deleteTask()
@@ -61,7 +67,7 @@ void MainWindow::deleteTask()
 
 void MainWindow::loadTasks()
 {
-    disconnectTasks();
+    //disconnectTasks();
     tasks.clear();
     ui->treeWidget->clear();
 
@@ -73,14 +79,14 @@ void MainWindow::loadTasks()
         tasks.push_back(task);
         QStringList params;
 
-        params.append(task->name());
-        params.append(task->dir());
-        params.append(task->backupDir());
-        params.append(task->backupTime().toString("hh:mm"));
+        params.append(task->getName());
+        params.append(task->getInputFolder());
+        params.append(task->getOutputFolder());
+        params.append(task->getAutoBackupTime().toString("hh:mm"));
         items.append(new QTreeWidgetItem(ui->treeWidget, params));
     }
     ui->treeWidget->addTopLevelItems(items);
-    connectTasks();
+    //connectTasks();
 }
 
 void MainWindow::addTask()
@@ -105,8 +111,14 @@ void MainWindow::addTask()
 void MainWindow::showTaskSettings(QString taskName)
 {
     foreach (backupTask *task, tasks) {
-        if(task->name() == taskName){
-            task->show();
+        if(task->getName() == taskName){
+            //task->show();
+            taskDialog *taskDialogWindow = new taskDialog(task);
+            taskDialogWindow->show();
+            connect(taskDialogWindow, SIGNAL(accepted()), this, SLOT(loadTasks()));
+            connect(taskDialogWindow, SIGNAL(accepted()), taskDialogWindow, SLOT(deleteLater()));
+            connect(taskDialogWindow, SIGNAL(rejected()), taskDialogWindow, SLOT(deleteLater()));
+
             break;
         }
     }
@@ -115,12 +127,7 @@ void MainWindow::showTaskSettings(QString taskName)
 void MainWindow::showTaskSettings(QTreeWidgetItem *item)
 {
     QString taskName = item->text(0);
-    foreach (backupTask *task, tasks) {
-        if(task->name() == taskName){
-            task->show();
-            break;
-        }
-    }
+    this->showTaskSettings(taskName);
 }
 
 void MainWindow::connectTasks()
@@ -148,10 +155,11 @@ void MainWindow::toggleVisible()
 void MainWindow::startBackup()
 {
     foreach (backupTask *task, tasks) {
-        if(task->enabledAutoBackup()){
-            if(task->backupTime().hour() == QTime::currentTime().hour() &&
-                    task->backupTime().minute() == QTime::currentTime().minute()){
-                task->runBackup();
+        if(task->getAutoBackup()){
+            if(task->getAutoBackupTime().hour() == QTime::currentTime().hour() &&
+                    task->getAutoBackupTime().minute() == QTime::currentTime().minute()){
+                //task->runBackup();
+                backupQueue->enqueue(task);
             }
         }
     }
@@ -160,9 +168,21 @@ void MainWindow::startBackup()
 void MainWindow::trayMessageSlot(bool ok, QString messageText)
 {
     QString title = ok ? "Succes" : "Error";
-    QSystemTrayIcon::MessageIcon messageIcon =
-            ok ? QSystemTrayIcon::Information : QSystemTrayIcon::Critical;
+    QSystemTrayIcon::MessageIcon messageIcon = ok ? QSystemTrayIcon::Information : QSystemTrayIcon::Critical;
+
     this->systemTray->showMessage(title, messageText, messageIcon);
+}
+
+void MainWindow::powerOff()
+{
+    if(QTime::currentTime() >= qSett.value("powerOffTime").toTime()){
+#ifdef Q_OS_WIN32
+        QProcess::startDetached("shutdown -s -f -t 00");
+#endif
+#ifdef Q_OS_LINUX
+        QProcess::startDetached("shutdown -P now");
+#endif
+    }
 }
 
 MainWindow::~MainWindow()
@@ -189,8 +209,8 @@ void MainWindow::on_actionRun_Backup_triggered()
 {
     QString taskName = ui->treeWidget->currentItem()->text(0);
     foreach (backupTask *task, tasks) {
-        if(task->name() == taskName){
-            task->runBackup();
+        if(task->getName() == taskName){
+            backupQueue->enqueue(task);
         }
     }
 }
@@ -201,3 +221,8 @@ void MainWindow::on_actionSettings_triggered()
     MWSettings.loadSettings();
 }
 
+
+void MainWindow::on_actionShow_queue_triggered()
+{
+    backupQueue->show();
+}

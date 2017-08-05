@@ -2,13 +2,13 @@
 #define BACKUPER_H
 
 #include <QObject>
+#include <backuptask.h>
 
 class Backuper : public QObject
 {
     Q_OBJECT
 public:
-    explicit Backuper(QObject *parent = nullptr);
-    explicit Backuper(QString fileName, QString backupiedDir);
+    explicit Backuper(QString fileCompressed, QString inputFolder, QObject *parent = nullptr);
 
 signals:
     void backupFinished();
@@ -17,8 +17,8 @@ public slots:
     void runBackup();
 
 private:
-    QString fileName;
-    QString backupiedDir;
+    QString inputFolder;
+    QString fileCompressed;
 };
 
 #endif // BACKUPER_H

@@ -3,6 +3,8 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QLineEdit>
+#include <QCheckBox>
+#include <QTimeEdit>
 
 settings::settings(QWidget *parent) :
     QDialog(parent),
@@ -28,6 +30,8 @@ void settings::on_getTokenButton_clicked()
 void settings::on_buttonBox_accepted()
 {
     qSett.setValue("token", ui->YDlineEdit->text());
+    qSett.setValue("powerOff", ui->poweroffCheckBox->isChecked());
+    qSett.setValue("powerOffTime", ui->poweroffTimeEdit->time());
     this->accept();
 }
 
@@ -35,4 +39,6 @@ void settings::loadSettings()
 {
     QString Token = qSett.value("token").toString();
     ui->YDlineEdit->setText(qSett.value("token").toString());
+    ui->poweroffCheckBox->setChecked(qSett.value("powerOff").toBool());
+    ui->poweroffTimeEdit->setTime(qSett.value("powerOffTime").toTime());
 }

@@ -1,4 +1,5 @@
 #include "backuper.h"
+#include "backuptask.h"
 
 #ifdef Q_OS_WIN32
 #include "quazip/JlCompress.h"
@@ -9,19 +10,15 @@
 #endif
 
 
-Backuper::Backuper(QObject *parent) : QObject(parent)
+Backuper::Backuper(QString fileCompressed, QString inputFolder, QObject *parent) : QObject(parent)
 {
-
+    this->fileCompressed = fileCompressed;
+    this->inputFolder = inputFolder;
 }
 
-Backuper::Backuper(QString fileName, QString backupiedDir)
-{
-    this->fileName = fileName;
-    this->backupiedDir = backupiedDir;
-}
 
 void Backuper::runBackup()
 {
-    JlCompress::compressDir(fileName, backupiedDir, true, QDir::AllDirs);
+    bool ok = JlCompress::compressDir(fileCompressed, inputFolder, true, QDir::AllDirs);
     emit backupFinished();
 }
