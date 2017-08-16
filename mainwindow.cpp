@@ -106,6 +106,7 @@ void MainWindow::addTask()
     tasks.push_back(new backupTask(name));	//creating backupTask object and adding to vector
     qSett.setValue("tasks", taskNames);
     loadTasks();
+    showTaskSettings(name);
 }
 
 void MainWindow::showTaskSettings(QString taskName)
@@ -176,6 +177,7 @@ void MainWindow::trayMessageSlot(bool ok, QString messageText)
 void MainWindow::powerOff()
 {
     if(QTime::currentTime() >= qSett.value("powerOffTime").toTime()){
+
 #ifdef Q_OS_WIN32
         QProcess::startDetached("shutdown -s -f -t 00");
 #endif
