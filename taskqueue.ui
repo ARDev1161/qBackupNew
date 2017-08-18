@@ -41,6 +41,13 @@
     </widget>
    </item>
    <item>
+    <widget class="QProgressBar" name="uploadProgressBar">
+     <property name="value">
+      <number>0</number>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QPushButton" name="pushButton">
      <property name="text">
       <string>Clear</string>

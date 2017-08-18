@@ -30,7 +30,9 @@ SOURCES += main.cpp\
     backuptask.cpp \
     taskdialog.cpp \
     taskqueue.cpp \
-    taskuploader.cpp
+    taskuploader.cpp \
+    CustomClasses/timedmessagebox.cpp \
+    YandexDisk/ydapi.cpp
 
 HEADERS  += mainwindow.h \
     settings.h \
@@ -38,7 +40,9 @@ HEADERS  += mainwindow.h \
     backuptask.h \
     taskdialog.h \
     taskqueue.h \
-    taskuploader.h
+    taskuploader.h \
+    CustomClasses/timedmessagebox.h \
+    YandexDisk/ydapi.h
 
 FORMS    += mainwindow.ui \
     settings.ui \

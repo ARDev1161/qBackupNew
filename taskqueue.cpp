@@ -4,6 +4,7 @@
 #include <QList>
 #include <QThread>
 #include <QProgressBar>
+#include <QMessageBox>
 
 #include "backuper.h"
 #include "taskqueue.h"
@@ -52,7 +53,14 @@ void taskQueue::enqueue(backupTask *task)
 void taskQueue::updateProgressBar()
 {
     completeOps++;
-    ui->progressBar->setValue(100.0*completeOps/numberOfOps);
+    ui->progressBar->setValue(100*completeOps/numberOfOps);
+}
+
+void taskQueue::updateUploadProgressBar(qint64 sent, qint64 total)
+{
+    ui->uploadProgressBar->setMaximum(100);
+    if(total != 0 )
+        ui->uploadProgressBar->setValue((qint64)((100 * sent)/total));
 }
 
 void taskQueue::start()
@@ -99,26 +107,34 @@ void taskQueue::upload()
     ui->treeWidget->topLevelItem(currentIndex)->setText(1, "Done");
 
     if(currentTask->getUpload()){
-        QThread *thread = new QThread();
+//        QThread *thread = new QThread();
         taskUploader *uploader = new taskUploader(currentTask, currentFileName);
 
-        uploader->moveToThread(thread);
+//        uploader->moveToThread(thread);
 
-        connect(thread, SIGNAL(started()), uploader, SLOT(upload()));
-        connect(uploader, SIGNAL(finished()), thread, SLOT(quit()));
-        connect(uploader, SIGNAL(finished()), this, SLOT(afterUpload()));
+//        connect(thread, SIGNAL(started()), uploader, SLOT(upload()));
+//        connect(uploader, SIGNAL(finished()), thread, SLOT(quit()));
+//        connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+
+        connect(uploader, SIGNAL(finished()), this, SLOT(onUploadFinished()));
         connect(uploader, SIGNAL(finished()), uploader, SLOT(deleteLater()));
-        connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+        connect(uploader, SIGNAL(onError(YDAPI*)), this, SLOT(uploadError(YDAPI*)));
+        connect(uploader, SIGNAL(onErrorInRequest(QString,QString)),
+                this, SLOT(uploadErrorInRequest(QString,QString)));
 
-        thread->start();
+        //thread->start();
+        connect(uploader, SIGNAL(uploadProgress(qint64,qint64)),
+                this, SLOT(updateUploadProgressBar(qint64,qint64)));
+        uploader->upload();
     } else {
         isWorking = false;
+        if(completeOps == numberOfOps) emit backupFinished();
         start();
     }
 
 }
 
-void taskQueue::afterUpload()
+void taskQueue::onUploadFinished()
 {
     updateProgressBar();
     ui->treeWidget->topLevelItem(currentIndex)->setText(2, "Done");
@@ -144,4 +160,29 @@ void taskQueue::on_pushButton_clicked()
 {
     if(!isWorking)
         this->clear();
+}
+
+void taskQueue::uploadError(YDAPI *api)
+{
+    QMessageBox::critical(this, tr("Upload error"), api->getErrorMessage());
+    updateProgressBar();
+    ui->treeWidget->topLevelItem(currentIndex)->setText(2, "Error");
+    isWorking = false;
+
+    if(completeOps == numberOfOps) emit backupFinished();
+
+    start();
+}
+
+void taskQueue::uploadErrorInRequest(QString error, QString description)
+{
+    QMessageBox::critical(this, error, description);
+    updateProgressBar();
+    ui->treeWidget->topLevelItem(currentIndex)->setText(2, "Error");
+    isWorking = false;
+
+    if(completeOps == numberOfOps) emit backupFinished();
+
+    start();
+
 }

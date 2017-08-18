@@ -8,12 +8,14 @@
 #include <QDir>
 #include <QTimer>
 #include <QProcess>
+#include <QMessageBox>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "backuptask.h"
 #include "taskdialog.h"
 #include "settings.h"
+#include "CustomClasses/timedmessagebox.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -177,14 +179,31 @@ void MainWindow::trayMessageSlot(bool ok, QString messageText)
 void MainWindow::powerOff()
 {
     if(QTime::currentTime() >= qSett.value("powerOffTime").toTime()){
+        TimedMessageBox *msb = new TimedMessageBox(
+                    60,
+                    TimedMessageBox::Question,
+                    tr("Shutdown"),
+                    tr("Do you want to shutdown now? (%1)"),
+                    TimedMessageBox::No | TimedMessageBox::Yes);
+        msb->setDefaultButton(TimedMessageBox::Yes);
 
+        bool res = msb->exec();
+
+        if(res == true){
 #ifdef Q_OS_WIN32
         QProcess::startDetached("shutdown -s -f -t 00");
 #endif
 #ifdef Q_OS_LINUX
-        QProcess::startDetached("shutdown -P now");
+        //QProcess::startDetached("shutdown -P now");
 #endif
+        }
     }
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    event->ignore();
+    this->hide();
 }
 
 MainWindow::~MainWindow()

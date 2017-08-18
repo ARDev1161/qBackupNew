@@ -32,6 +32,7 @@ void settings::on_buttonBox_accepted()
     qSett.setValue("token", ui->YDlineEdit->text());
     qSett.setValue("powerOff", ui->poweroffCheckBox->isChecked());
     qSett.setValue("powerOffTime", ui->poweroffTimeEdit->time());
+    qSett.setValue("autoStart", ui->autoStartCheckBox->isChecked());
     this->accept();
 }
 
@@ -41,4 +42,25 @@ void settings::loadSettings()
     ui->YDlineEdit->setText(qSett.value("token").toString());
     ui->poweroffCheckBox->setChecked(qSett.value("powerOff").toBool());
     ui->poweroffTimeEdit->setTime(qSett.value("powerOffTime").toTime());
+    ui->autoStartCheckBox->setChecked(qSett.value("autoStart").toBool());
+}
+
+void settings::on_checkBox_toggled(bool checked)
+{
+    qSett.setValue("autoStart", checked);
+#ifdef Q_OS_WIN32
+    if(checked){
+        QSettings setting("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+                          QSettings::NativeFormat);
+        setting.setValue(APPLICATION_NAME,
+                         QDir::toNativeSeparators(QCoreApplication::applicationFilePath()) + " MINIMIZE");
+        setting.sync();
+    } else {
+        QSettings setting("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+                          QSettings::NativeFormat);
+        setting.remove(APPLICATION_NAME);
+        setting.sync();
+    }
+#endif
+
 }

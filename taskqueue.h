@@ -5,6 +5,7 @@
 #include <QList>
 #include "backuptask.h"
 #include "backuper.h"
+#include "YandexDisk/ydapi.h"
 
 namespace Ui {
 class taskQueue;
@@ -27,10 +28,14 @@ private slots:
     void upload();
     void start();
     void updateProgressBar();
-    void afterUpload();
+    void updateUploadProgressBar(qint64 sent, qint64 total);
+    void onUploadFinished();
     void clear();
 
     void on_pushButton_clicked();
+
+    void uploadError(YDAPI *api);
+    void uploadErrorInRequest(QString error, QString description);
 
 private:
     Ui::taskQueue *ui;

@@ -45,6 +45,8 @@ private slots:
 
     void powerOff();
 
+    void closeEvent(QCloseEvent *event);
+
     //--------------------------------------
     void on_actionAdd_task_triggered();
 

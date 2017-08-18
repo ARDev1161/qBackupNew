@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <backuptask.h>
-#include <ydapi.h>
+#include "YandexDisk/ydapi.h"
 
 class taskUploader : public QObject
 {
@@ -13,6 +13,11 @@ public:
 
 signals:
     void finished();
+
+    void onError(YDAPI *api);
+    void onErrorInRequest(QString error, QString description);
+
+    void uploadProgress(qint64 sent, qint64 total);
 
 public slots:
     void upload();

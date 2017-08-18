@@ -22,6 +22,8 @@ private slots:
 
     void on_buttonBox_accepted();
 
+    void on_checkBox_toggled(bool checked);
+
 private:
     QSettings qSett;
     Ui::settings *ui;
