@@ -3,6 +3,7 @@
 #include <QTranslator>
 #include <QLibraryInfo>
 #include <QDir>
+#include <QTextCodec>
 
 int main(int argc, char *argv[])
 {
@@ -24,6 +25,9 @@ int main(int argc, char *argv[])
         qApp->exit();
     else
         qApp->installTranslator(translator);
+
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName("IBM866"));
+
 
     MainWindow w;
 

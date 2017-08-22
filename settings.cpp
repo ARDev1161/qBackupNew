@@ -5,6 +5,9 @@
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QTimeEdit>
+#include <QDir>
+
+#define APPLICATION_NAME "QBackup2"
 
 settings::settings(QWidget *parent) :
     QDialog(parent),

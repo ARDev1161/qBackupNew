@@ -42,26 +42,6 @@
    </layout>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>599</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuFIle">
-    <property name="title">
-     <string>&amp;FIle</string>
-    </property>
-    <addaction name="actionAdd_task"/>
-    <addaction name="actionRemove_task"/>
-    <addaction name="actionUpdate"/>
-    <addaction name="actionRun_Backup"/>
-   </widget>
-   <addaction name="menuFIle"/>
-  </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
     <string>toolBar</string>

@@ -57,9 +57,3 @@ win32 {
     LIBS += -lquazip5
 }
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../aur/build-YDAPI-Desktop-Debug/release/ -lYDAPI
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../aur/build-YDAPI-Desktop-Debug/debug/ -lYDAPI
-else:unix: LIBS += -L$$PWD/../../aur/build-YDAPI-Desktop-Debug/ -lYDAPI
-
-INCLUDEPATH += $$PWD/../../aur/build-YDAPI-Desktop-Debug
-DEPENDPATH += $$PWD/../../aur/build-YDAPI-Desktop-Debug
