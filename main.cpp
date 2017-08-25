@@ -26,8 +26,9 @@ int main(int argc, char *argv[])
     else
         qApp->installTranslator(translator);
 
+#ifdef Q_OS_WIN32
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("IBM866"));
-
+#endif
 
     MainWindow w;
 

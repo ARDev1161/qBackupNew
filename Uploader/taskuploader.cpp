@@ -1,5 +1,5 @@
 #include "taskuploader.h"
-#include "YandexDisk/ydapi.h"
+#include "Uploader/ydapi.h"
 
 taskUploader::taskUploader(backupTask *task, QString fileFullPath, QObject *parent) : QObject(parent)
 {

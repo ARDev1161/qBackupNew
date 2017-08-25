@@ -26,23 +26,25 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += main.cpp\
         mainwindow.cpp \
     settings.cpp \
-    backuper.cpp \
     backuptask.cpp \
     taskdialog.cpp \
     taskqueue.cpp \
-    taskuploader.cpp \
     CustomClasses/timedmessagebox.cpp \
-    YandexDisk/ydapi.cpp
+    Zipper/namorzipper.cpp \
+    Zipper/zipper.cpp \
+    Uploader/taskuploader.cpp \
+    Uploader/ydapi.cpp
 
 HEADERS  += mainwindow.h \
     settings.h \
-    backuper.h \
     backuptask.h \
     taskdialog.h \
     taskqueue.h \
-    taskuploader.h \
     CustomClasses/timedmessagebox.h \
-    YandexDisk/ydapi.h
+    Zipper/namorzipper.h \
+    Zipper/zipper.h \
+    Uploader/taskuploader.h \
+    Uploader/ydapi.h
 
 FORMS    += mainwindow.ui \
     settings.ui \

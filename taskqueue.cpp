@@ -1,3 +1,4 @@
+#include <QApplication>
 #include <QTreeWidgetItem>
 #include <QDir>
 #include <QStringList>
@@ -5,11 +6,12 @@
 #include <QThread>
 #include <QProgressBar>
 #include <QMessageBox>
+#include <QTextStream>
 
-#include "backuper.h"
+#include "Zipper/zipper.h"
 #include "taskqueue.h"
 #include "ui_taskqueue.h"
-#include "taskuploader.h"
+#include "Uploader/taskuploader.h"
 
 taskQueue::taskQueue(QWidget *parent) :
     QDialog(parent),
@@ -70,72 +72,59 @@ void taskQueue::start()
     currentTask = queue.takeFirst();
     isWorking = true;
 
-    currentFileName = currentTask->getOutputFolder() + QDir::separator() +
-            currentTask->getName() + "_" + QDate::currentDate().toString("dd.MM.yyyy");
+    currentFileName = genFileName(currentTask->getOutputFolder(), currentTask->getName());
+    writeToLog("File name " + currentFileName);
 
-    QString tempFileName = currentFileName + ".zip";
-
-    if(QFile(tempFileName).exists()){
-        bool exist = true;
-        for(int i=0; exist != false; i++){
-            QString buffFileName = currentFileName+QString("(%1)").arg(i);
-            if(!QFile(buffFileName+".zip").exists()){
-                exist = false;
-                currentFileName = buffFileName+".zip";
-            }
-        }
-    } else {
-        currentFileName += ".zip";
-    }
-
+    zipper *backuper = new zipper(true, currentTask->getInputFolder(), currentFileName);
     QThread *thread = new QThread();
-    Backuper *threadBackuper = new Backuper(currentFileName, currentTask->getInputFolder());
-    threadBackuper->moveToThread(thread);
+    backuper->moveToThread(thread);
 
-    connect(thread, SIGNAL(started()), threadBackuper, SLOT(runBackup()));
-    connect(threadBackuper, SIGNAL(backupFinished()), thread, SLOT(quit()));
-    connect(threadBackuper, SIGNAL(backupFinished()), this, SLOT(upload())); //after runBackup
-    connect(threadBackuper, SIGNAL(backupFinished()), threadBackuper, SLOT(deleteLater()));
-    connect(thread, SIGNAL(backupFinished()), thread, SLOT(deleteLater()));
+    connect(thread, SIGNAL(started()), backuper, SLOT(start()));
+    connect(backuper, SIGNAL(compressProgress(qint64,qint64)),
+            this, SLOT(updateUploadProgressBar(qint64,qint64)));
+    connect(backuper, SIGNAL(compressFinished()), this, SLOT(upload()));
+    connect(backuper, SIGNAL(compressFinished()), thread, SLOT(quit()));
+    connect(backuper, SIGNAL(compressFinished()), backuper, SLOT(deleteLater()));
+    connect(backuper, SIGNAL(compressFinished()), thread, SLOT(deleteLater()));
 
     thread->start();
+
+    writeToLog("Backuping " + currentTask->getInputFolder() +" to " + currentFileName);
 }
 
 void taskQueue::upload()
 {
+    writeToLog("Backuping complete");
+
     updateProgressBar();
     ui->treeWidget->topLevelItem(currentIndex)->setText(1, "Done");
 
     if(currentTask->getUpload()){
-//        QThread *thread = new QThread();
         taskUploader *uploader = new taskUploader(currentTask, currentFileName);
-
-//        uploader->moveToThread(thread);
-
-//        connect(thread, SIGNAL(started()), uploader, SLOT(upload()));
-//        connect(uploader, SIGNAL(finished()), thread, SLOT(quit()));
-//        connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
 
         connect(uploader, SIGNAL(finished()), this, SLOT(onUploadFinished()));
         connect(uploader, SIGNAL(finished()), uploader, SLOT(deleteLater()));
         connect(uploader, SIGNAL(onError(YDAPI*)), this, SLOT(uploadError(YDAPI*)));
         connect(uploader, SIGNAL(onErrorInRequest(QString,QString)),
                 this, SLOT(uploadErrorInRequest(QString,QString)));
-
-        //thread->start();
         connect(uploader, SIGNAL(uploadProgress(qint64,qint64)),
                 this, SLOT(updateUploadProgressBar(qint64,qint64)));
+
         uploader->upload();
+
+        writeToLog("Start uploading");
+
     } else {
         isWorking = false;
         if(completeOps == numberOfOps) emit backupFinished();
+        writeToLog("Uploading is disabled");
         start();
     }
-
 }
 
 void taskQueue::onUploadFinished()
 {
+    writeToLog("Uploading complete");
     updateProgressBar();
     ui->treeWidget->topLevelItem(currentIndex)->setText(2, "Done");
     isWorking = false;
@@ -169,6 +158,8 @@ void taskQueue::uploadError(YDAPI *api)
     ui->treeWidget->topLevelItem(currentIndex)->setText(2, "Error");
     isWorking = false;
 
+    writeToLog("Upload error: " + api->getErrorMessage());
+
     if(completeOps == numberOfOps) emit backupFinished();
 
     start();
@@ -181,8 +172,44 @@ void taskQueue::uploadErrorInRequest(QString error, QString description)
     ui->treeWidget->topLevelItem(currentIndex)->setText(2, "Error");
     isWorking = false;
 
+    writeToLog("Upload error: " + error + ": " + description);
+
     if(completeOps == numberOfOps) emit backupFinished();
 
     start();
 
+}
+
+QString taskQueue::genFileName(QString path, QString name)
+{
+     QString tempFileName = path + QDir::separator() + name +
+             "_" + QDate::currentDate().toString("dd.MM.yyyy");
+
+    if(QFile(tempFileName + ".zip").exists()){
+        bool exist = true;
+        for(int i=1; exist != false; i++){
+            QString buffFileName = tempFileName + QString("(%1)").arg(i);
+            if(!QFile(buffFileName + ".zip").exists()){
+                exist = false;
+                tempFileName = buffFileName+".zip";
+            }
+        }
+    } else {
+        tempFileName += ".zip";
+    }
+    return tempFileName;
+}
+
+void taskQueue::writeToLog(QString logInfo)
+{
+    QString buffText = "[ " + QDate::currentDate().toString("dd.MM.yyyy") + " " +
+            QTime::currentTime().toString("hh:mm:ss") + " " + currentTask->getName() + "] " + logInfo + "\n";
+
+    QFile *logFile = new QFile(QApplication::applicationDirPath() + QDir::separator() + "log.txt");
+    logFile->open(QIODevice::Append | QIODevice::Text);
+    //QTextStream logStream(logFile);
+    logFile->write(buffText.toUtf8());
+    logFile->flush();
+    logFile->close();
+    logFile->deleteLater();
 }

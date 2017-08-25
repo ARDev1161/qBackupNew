@@ -4,8 +4,7 @@
 #include <QDialog>
 #include <QList>
 #include "backuptask.h"
-#include "backuper.h"
-#include "YandexDisk/ydapi.h"
+#include "Uploader/ydapi.h"
 
 namespace Ui {
 class taskQueue;
@@ -25,8 +24,8 @@ signals:
     void backupFinished();
 
 private slots:
-    void upload();
     void start();
+    void upload();
     void updateProgressBar();
     void updateUploadProgressBar(qint64 sent, qint64 total);
     void onUploadFinished();
@@ -49,6 +48,9 @@ private:
     backupTask *currentTask;
     short int currentIndex;
     QString currentFileName;
+
+    QString genFileName(QString path, QString name);
+    void writeToLog(QString logInfo);
 
 };
 

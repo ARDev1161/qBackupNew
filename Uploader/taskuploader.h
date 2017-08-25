@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <backuptask.h>
-#include "YandexDisk/ydapi.h"
+#include "Uploader/ydapi.h"
 
 class taskUploader : public QObject
 {
