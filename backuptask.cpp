@@ -1,15 +1,14 @@
 #include "backuptask.h"
 
-backupTask::backupTask(QObject *parent) : QObject(parent)
-{
-
-}
-
-backupTask::backupTask(QString name) : QObject(NULL)
+backupTask::backupTask(QString name, QObject *parent) : QObject(parent)
 {
     this->name = name;
     this->loadSettings();
 }
+
+//backupTask::backupTask(QString name) : QObject(NULL)
+//{
+//}
 
 QString backupTask::getName() const
 {

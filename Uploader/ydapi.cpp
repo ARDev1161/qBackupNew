@@ -53,21 +53,6 @@ void YDAPI::createFolder(QString folderName)
     }
 }
 
-//void YDAPI::fileInfo(QString path)
-//{
-//    QString url = "https://cloud-api.yandex.net:443/v1/disk/resources?path=app:/";
-//    url.append(path);
-//
-//    QNetworkRequest request;
-//    request.setUrl(QUrl(url));
-//    request.setRawHeader(QByteArray("Accept"), QByteArray("application/json"));
-//    request.setRawHeader(QByteArray("Authorization"), QByteArray(token.toUtf8()));
-//
-//    connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(fileInfoHandler(QNetworkReply*)));
-//    manager->get(request);
-//}
-//
-//private
 void YDAPI::upload(QString fileName)
 {
 

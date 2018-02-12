@@ -47,7 +47,7 @@ private slots:
 
     void closeEvent(QCloseEvent *event);
 
-    //--------------------------------------
+    //--------------------------------------gui actions
     void on_actionAdd_task_triggered();
 
     void on_actionRemove_task_triggered();
@@ -59,6 +59,8 @@ private slots:
     void on_actionSettings_triggered();
 
     void on_actionShow_queue_triggered();
+
+    void on_actionExit_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -73,7 +75,7 @@ private:
 
     QVector<backupTask*> tasks;
     QAction *toggleVisibleAction;
-    QAction *togleVisibleAction;
+    QAction *triggerExitAction;
 };
 
 #endif // MAINWINDOW_H

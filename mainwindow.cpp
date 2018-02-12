@@ -23,33 +23,34 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    connect(ui->treeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
-            this, SLOT(showTaskSettings(QTreeWidgetItem*)));            //open task settings window
+
     loadTasks();
 
+    connect(ui->treeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+            this, 			SLOT(showTaskSettings(QTreeWidgetItem*)));            //open task settings window
+
     //----------------------Tray menu
-    togleVisibleAction = new QAction(tr("Exit"), this);
+    triggerExitAction 	= new QAction(tr("Exit"), this);
     toggleVisibleAction = new QAction(tr("Show/Hide"), this);
+
+    connect(triggerExitAction, SIGNAL(triggered(bool)), qApp, SLOT(quit()));
+    connect(toggleVisibleAction, SIGNAL(triggered(bool)), this, SLOT(toggleVisible()));
 
     trayMenu = new QMenu(this);
     trayMenu->addAction(toggleVisibleAction);
-    trayMenu->addAction(togleVisibleAction);
+    trayMenu->addAction(triggerExitAction);
 
     systemTray = new QSystemTrayIcon(this);
     systemTray->setIcon(QIcon(qApp->applicationDirPath()+QDir::separator()+"backup.png"));
     systemTray->setContextMenu(trayMenu);
     systemTray->setVisible(true);
 
-    connect(togleVisibleAction, SIGNAL(triggered(bool)), qApp, SLOT(quit()));
-    connect(toggleVisibleAction, SIGNAL(triggered(bool)), this, SLOT(toggleVisible()));
-    //----------------------Tray menu
-
+    //----------------------Timer
     backupTimer = new QTimer(this);
     backupTimer->start(50000);
     connect(backupTimer, SIGNAL(timeout()), this, SLOT(startBackup()));
 
-
-    //------------
+    //------------Auto poweroff
     connect(backupQueue, SIGNAL(backupFinished()), this, SLOT(powerOff()));
 }
 
@@ -70,7 +71,6 @@ void MainWindow::deleteTask()
 
 void MainWindow::loadTasks()
 {
-    //disconnectTasks();
     tasks.clear();
     ui->treeWidget->clear();
 
@@ -89,7 +89,6 @@ void MainWindow::loadTasks()
         items.append(new QTreeWidgetItem(ui->treeWidget, params));
     }
     ui->treeWidget->addTopLevelItems(items);
-    //connectTasks();
 }
 
 void MainWindow::addTask()
@@ -116,9 +115,9 @@ void MainWindow::showTaskSettings(QString taskName)
 {
     foreach (backupTask *task, tasks) {
         if(task->getName() == taskName){
-            //task->show();
             taskDialog *taskDialogWindow = new taskDialog(task);
             taskDialogWindow->show();
+
             connect(taskDialogWindow, SIGNAL(accepted()), this, SLOT(loadTasks()));
             connect(taskDialogWindow, SIGNAL(accepted()), taskDialogWindow, SLOT(deleteLater()));
             connect(taskDialogWindow, SIGNAL(rejected()), taskDialogWindow, SLOT(deleteLater()));
@@ -160,9 +159,9 @@ void MainWindow::startBackup()
 {
     foreach (backupTask *task, tasks) {
         if(task->getAutoBackup()){
-            if(task->getAutoBackupTime().hour() == QTime::currentTime().hour() &&
-                    task->getAutoBackupTime().minute() == QTime::currentTime().minute()){
-                //task->runBackup();
+            if(task->getAutoBackupTime().hour() 	== QTime::currentTime().hour() &&
+               task->getAutoBackupTime().minute() 	== QTime::currentTime().minute())
+            {
                 backupQueue->enqueue(task);
             }
         }
@@ -180,28 +179,30 @@ void MainWindow::trayMessageSlot(bool ok, QString messageText)
 void MainWindow::powerOff()
 {
     if(QTime::currentTime() >= qSett.value("powerOffTime").toTime()){
-        TimedMessageBox *msb = new TimedMessageBox(
-                    60,
-                    TimedMessageBox::Question,
-                    tr("Shutdown"),
-                    tr("Do you want to shutdown now? (%1)"),
-                    TimedMessageBox::No | TimedMessageBox::Yes);
-        msb->setDefaultButton(TimedMessageBox::Yes);
+        TimedMessageBox *messageBox = new TimedMessageBox(
+                                60,
+                                TimedMessageBox::Question,
+                                tr("Shutdown"),
+                                tr("Do you want to shutdown now? (%1)"),
+                                TimedMessageBox::No | TimedMessageBox::Yes
+                                );
 
-        bool res = msb->exec();
+        messageBox->setDefaultButton(TimedMessageBox::Yes);
 
-        if(res == true){
+        bool result = messageBox->exec();
+
+        if(result == true){
 #ifdef Q_OS_WIN32
-        QProcess::startDetached("shutdown -s -f -t 00");
+            QProcess::startDetached("shutdown -s -f -t 00");
 #endif
 #ifdef Q_OS_LINUX
-        //QProcess::startDetached("shutdown -P now");
+            //QProcess::startDetached("shutdown -P now");
 #endif
         }
     }
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::closeEvent(QCloseEvent *event) //close main window
 {
     event->ignore();
     this->hide();
@@ -212,6 +213,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+//--------------------actions from gui
 void MainWindow::on_actionAdd_task_triggered()
 {
     addTask();
@@ -247,4 +249,9 @@ void MainWindow::on_actionSettings_triggered()
 void MainWindow::on_actionShow_queue_triggered()
 {
     backupQueue->show();
+}
+
+void MainWindow::on_actionExit_triggered()
+{
+    qApp->quit();
 }

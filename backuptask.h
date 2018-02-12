@@ -10,8 +10,8 @@ class backupTask : public QObject
 {
     Q_OBJECT
 public:
-    explicit backupTask(QObject *parent = nullptr);
-    backupTask(QString name);
+    explicit backupTask(QString name, QObject *parent = nullptr);
+    //backupTask(QString name);
 
     QString getName() const;
 
@@ -29,10 +29,6 @@ public:
 
     bool getUpload() const;
     void setUpload(bool value);
-
-signals:
-
-public slots:
 
 private:
     QString name;

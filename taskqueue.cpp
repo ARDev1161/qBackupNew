@@ -35,7 +35,6 @@ taskQueue::~taskQueue()
 void taskQueue::enqueue(backupTask *task)
 {
     queue.append(task);
-    //ui->treeWidget->clear();
 
     QStringList params;
     params.append(task->getName());
@@ -43,7 +42,6 @@ void taskQueue::enqueue(backupTask *task)
     params.append(task->getUpload() ? "wait" : "-");
 
     QTreeWidgetItem *item = new QTreeWidgetItem(ui->treeWidget, params);
-    //ui->treeWidget->insertTopLevelItem(ui->treeWidget->topLevelItemCount(), item);
     ui->treeWidget->addTopLevelItem(item);
 
     numberOfOps += task->getUpload() ? 2 : 1;
@@ -70,20 +68,24 @@ void taskQueue::start()
     if(queue.empty()) return;
     currentIndex++;
     currentTask = queue.takeFirst();
-    isWorking = true;
+    isWorking 	= true;
 
     currentFileName = genFileName(currentTask->getOutputFolder(), currentTask->getName());
     writeToLog("File name " + currentFileName);
 
     zipper *backuper = new zipper(true, currentTask->getInputFolder(), currentFileName);
-    QThread *thread = new QThread();
+    QThread *thread  = new QThread();
     backuper->moveToThread(thread);
 
-    connect(thread, SIGNAL(started()), backuper, SLOT(start()));
+    connect(thread,	  SIGNAL(started()), backuper, SLOT(start()));
     connect(backuper, SIGNAL(compressProgress(qint64,qint64)),
-            this, SLOT(updateUploadProgressBar(qint64,qint64)));
+            this, 	  SLOT(updateUploadProgressBar(qint64,qint64)));
     connect(backuper, SIGNAL(compressFinished()), this, SLOT(upload()));
     connect(backuper, SIGNAL(compressFinished()), thread, SLOT(quit()));
+
+    connect(backuper, SIGNAL(compressError(QString)), backuper, SLOT(deleteLater()));
+    connect(backuper, SIGNAL(compressError(QString)), thread, SLOT(deleteLater()));
+
     connect(backuper, SIGNAL(compressFinished()), backuper, SLOT(deleteLater()));
     connect(backuper, SIGNAL(compressFinished()), thread, SLOT(deleteLater()));
 
@@ -178,6 +180,19 @@ void taskQueue::uploadErrorInRequest(QString error, QString description)
 
     start();
 
+}
+
+void taskQueue::compressError(QString errorMsg)
+{
+    //QMessageBox::critical(this, "Error", errorMsg);
+//    updateProgressBar();
+//    ui->treeWidget->topLevelItem(currentIndex)->setText(1, "Error");
+//
+//    writeToLog("Compress error: "+ errorMsg);
+//
+//    if(completeOps == numberOfOps) emit backupFinished();
+//
+//    start();
 }
 
 QString taskQueue::genFileName(QString path, QString name)

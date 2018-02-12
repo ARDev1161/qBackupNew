@@ -14,7 +14,7 @@ public:
     static qint64 getTotalSize(QString dir);
 
 signals:
-    void onCompressFileError();
+    void onCompressError(QString errorMsg);
     void onCompressFileSucces();
     void onCompressDirSucces();
     void onZipProgress(qint64 zipped, qint64 total);
@@ -25,6 +25,7 @@ private:
     void compressDir(QuaZip  *zip, QString dir, QString zipDir);
 
     bool copyData(QIODevice &inFile, QIODevice &outFile);
+    bool isDirCompressing;
 
     qint64 totalSize;
     qint64 zippedSize;

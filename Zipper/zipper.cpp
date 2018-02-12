@@ -15,7 +15,7 @@ zipper::zipper(bool dir,
 void zipper::start()
 {
     NamorZipper *zipper = new NamorZipper(this);
-    connect(zipper, SIGNAL(onCompressFileError()), this, SIGNAL(compressError()));
+    connect(zipper, SIGNAL(onCompressError(QString)), this, SIGNAL(compressError(QString)));
     connect(zipper, SIGNAL(onZipProgress(qint64,qint64)), this, SIGNAL(compressProgress(qint64,qint64)));
     if(isDir){
         connect(zipper, SIGNAL(onCompressDirSucces()), this, SIGNAL(compressFinished()));

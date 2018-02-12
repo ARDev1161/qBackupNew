@@ -11,7 +11,7 @@ public:
 
 signals:
     void compressFinished();
-    void compressError();
+    void compressError(QString errorMsg);
     void compressProgress(qint64 compressed, qint64 total);
 
 public slots:

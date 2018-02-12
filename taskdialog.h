@@ -13,7 +13,7 @@ class taskDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit taskDialog(backupTask *inputTask, QWidget *parent = 0);
+    explicit taskDialog(backupTask *inputTask, QWidget *parent = nullptr);
     ~taskDialog();
 
 private slots:

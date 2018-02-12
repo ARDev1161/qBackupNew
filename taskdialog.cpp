@@ -25,14 +25,24 @@ taskDialog::~taskDialog()
 void taskDialog::on_inputFolderButton_clicked()
 {
     QString path = QFileDialog::getExistingDirectory(
-                this, "Open dir", QDir::homePath(), QFileDialog::ShowDirsOnly);
+                            this,
+                            "Open dir",
+                            QDir::homePath(),
+                            QFileDialog::ShowDirsOnly
+                            );
+
     ui->inputFolderLineEdit->setText(path);
 }
 
 void taskDialog::on_outputFolderButton_clicked()
 {
     QString path = QFileDialog::getExistingDirectory(
-                this, "Open backup dir", QDir::homePath(), QFileDialog::ShowDirsOnly);
+                            this,
+                            "Open backup dir",
+                            QDir::homePath(),
+                            QFileDialog::ShowDirsOnly
+                            );
+
     ui->outputFolderLineEdit->setText(path);
 }
 

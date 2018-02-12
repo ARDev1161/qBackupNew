@@ -13,11 +13,12 @@ NamorZipper::NamorZipper(QObject *parent) : QObject(parent)
 
 void NamorZipper::compressFile(QString file, QString archiveFile)
 {
+    isDirCompressing = false;
     QuaZip zip(archiveFile);
     QDir().mkpath(QFileInfo(archiveFile).absolutePath());
     if(zip.open(QuaZip::mdCreate) == false){
         QFile(archiveFile).remove();
-        emit onCompressFileError();
+        emit onCompressError(tr("Create file error"));
         return;
     }
     compressFile(&zip, file, QFileInfo(file).fileName());
@@ -25,6 +26,10 @@ void NamorZipper::compressFile(QString file, QString archiveFile)
 
 void NamorZipper::compressDir(QString dir, QString archiveFile)
 {
+    if(!QDir(dir).exists()){
+        emit onCompressError("Directory not exist");
+        return;
+    }
     totalSize = NamorZipper::getTotalSize(dir);
     zippedSize = 0;
 
@@ -32,7 +37,7 @@ void NamorZipper::compressDir(QString dir, QString archiveFile)
     QDir().mkpath(QFileInfo(archiveFile).absolutePath());
     if(zip.open(QuaZip::mdCreate) == false){
         QFile(archiveFile).remove();
-        emit onCompressFileError();
+        emit onCompressError("Create file error");
         return;
     }
     compressDir(&zip, dir, dir);
@@ -40,7 +45,7 @@ void NamorZipper::compressDir(QString dir, QString archiveFile)
     zip.close();
     if(zip.getZipError()!=0){
         QFile::remove(archiveFile);
-        emit onCompressFileError();
+        emit onCompressError("Zip file error");
         return;
     }
     emit onCompressDirSucces();
@@ -49,18 +54,18 @@ void NamorZipper::compressDir(QString dir, QString archiveFile)
 void NamorZipper::compressDir(QuaZip *zip, QString dir, QString zipDir)
 {
     if(!zip){
-        emit onCompressFileError();
+        emit onCompressError("API error");
         return;
     }
     if(zip->getMode() != QuaZip::mdAppend &&
             zip->getMode() != QuaZip::mdAdd &&
             zip->getMode() != QuaZip::mdCreate) {
-        emit onCompressFileError();
+        emit onCompressError("API mode error");
         return;
     }
     QDir directory(dir);
     if(directory.exists() == false){
-        emit onCompressFileError();
+        emit onCompressError("Doesn't exist");
         return;
     }
 
@@ -70,7 +75,7 @@ void NamorZipper::compressDir(QuaZip *zip, QString dir, QString zipDir)
         if(!dirZipFile.open(QIODevice::WriteOnly,
                             QuaZipNewInfo(zipDirectory.relativeFilePath(dir) + QDir::separator(), dir),
                             0, 0, 0)){
-            emit onCompressFileError();
+            emit onCompressError("Write error");
             return;
         }
         dirZipFile.close();
@@ -93,42 +98,45 @@ void NamorZipper::compressDir(QuaZip *zip, QString dir, QString zipDir)
 void NamorZipper::compressFile(QuaZip *zip, QString fileToCompress, QString fileName)
 {
     if(!zip){
-        emit onCompressFileError();
+        emit onCompressError("API error");
         return;
     }
     if(zip->getMode() != QuaZip::mdAppend &&
        zip->getMode() != QuaZip::mdAdd &&
        zip->getMode() != QuaZip::mdCreate) {
-        emit onCompressFileError();
+        emit onCompressError("API mode error");
         return;
     }
 
     QFile inFile;
     inFile.setFileName(fileToCompress);
     if(inFile.open(QFile::ReadOnly) == false){
-        emit onCompressFileError();
+        emit onCompressError("Read error");
         return;
     }
 
     QuaZipFile outFile(zip);
     if(outFile.open(QuaZipFile::WriteOnly, QuaZipNewInfo(fileName, inFile.fileName())) == false){
-        emit onCompressFileError();
+        emit onCompressError("Write error");
         return;
     }
 
     //zipping
     if(!copyData(inFile, outFile) || outFile.getZipError()!=UNZ_OK){
-        emit onCompressFileError();
+        emit onCompressError("Compress error");
         return;
     }
 
     outFile.close();
     if(outFile.getZipError()!=UNZ_OK){
-        emit onCompressFileError();
+        emit onCompressError("Zip file error");
         return;
     }
     inFile.close();
-    emit onCompressFileSucces();
+
+    if(!isDirCompressing)
+        emit onCompressFileSucces();
+
 }
 
 bool NamorZipper::copyData(QIODevice &inFile, QIODevice &outFile)

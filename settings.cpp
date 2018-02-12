@@ -1,11 +1,12 @@
-#include "settings.h"
-#include "ui_settings.h"
 #include <QDesktopServices>
 #include <QUrl>
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QTimeEdit>
 #include <QDir>
+
+#include "settings.h"
+#include "ui_settings.h"
 
 #define APPLICATION_NAME "QBackup2"
 
@@ -25,8 +26,7 @@ settings::~settings()
 
 void settings::on_getTokenButton_clicked()
 {
-    QString link =
-            "https://oauth.yandex.ru/authorize?response_type=token&client_id=b646ea711501461cb0cdae42f6a673ee";
+    QString link = "https://oauth.yandex.ru/authorize?response_type=token&client_id=b646ea711501461cb0cdae42f6a673ee";
     QDesktopServices::openUrl(QUrl(link));
 }
 
@@ -65,5 +65,4 @@ void settings::on_checkBox_toggled(bool checked)
         setting.sync();
     }
 #endif
-
 }

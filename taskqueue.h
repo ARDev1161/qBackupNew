@@ -35,6 +35,7 @@ private slots:
 
     void uploadError(YDAPI *api);
     void uploadErrorInRequest(QString error, QString description);
+    void compressError(QString errorMsg);
 
 private:
     Ui::taskQueue *ui;
